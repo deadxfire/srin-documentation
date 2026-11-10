@@ -16,10 +16,10 @@ This documentation is 100% self-contained static HTML, CSS, and vanilla JavaScri
 - `index.html` / `introduction.html` - Framework Philosophy & Standalone Architecture
 - `installation.html` - Requirements, Composer, Git, and .env Setup
 - `cli.html` - Complete `php srin` Console Command Reference (Scaffolding, Migrations, Route Inspection, Checkpoint Generation, and Real-Time Log Tailing)
-- `routing.html` - HTTP Verbs, Named Routes, Route Helpers, and Checkpoints (Linear Middleware Gates)
+- `routing.html` - Route Link System (`getlink()`, `postlink()`), Named Routes, Route Helpers, and Checkpoints (Linear Middleware Gates)
 - `controllers.html` - All 25+ BaseController Superpower Methods, Action Guards (`$this->guard()`), and Native HTTP File/Image Uploads
 - `views.html` - Srin Tags (`[if]`, `[each]`, `[empty]`, `[end]`), `[layout]`, `[block]`, `[slot]`, and XSS Sanitization
-- `assets.html` - `{{assets('')}}` Direct URL Linking & Automatic Image Folder Resolution
+- `assets.html` - `[[ asset('') ]]` Direct URL Linking & Automatic Image Folder Resolution
 - `database.html` - Multi-Driver Configuration (SQLite, MySQL, PostgreSQL), Transactions, `db()` Gateway
 - `models.html` - ActiveRecord CRUD, Fillable Mass Assignment, JSON Serialization
 - `query-builder.html` - Standalone Query Builder (`search`, `filter`, `distinctValues`, `when`, `pluck`)
@@ -27,7 +27,7 @@ This documentation is 100% self-contained static HTML, CSS, and vanilla JavaScri
 - `pagination.html` - Auto-Query Retaining Paginator & `[paginate]` Tag
 - `migrations.html` - Schema Blueprint Column Types, Modifiers, and Migration CLI
 - `seeders.html` - Database Seeders & Populating Test Data
-- `security.html` - Defense-in-Depth (CSRF, Honeypot Anti-Bot, Rate Limiting, Sanitization, Universal `Core\Auth` Authentication, and Secure File Uploads)
+- `security.html` - Defense-in-Depth (CSRF, Honeypot Anti-Bot, Rate Limiting, Sanitization, Memory-Hard Argon2id Password Hashing, Application Pepper, Zero-Downtime Auto-Rehashing, Military-Grade AES-256-GCM Authenticated Encryption with `Core\Crypt`, Universal `Core\Auth` Authentication, and Secure File Uploads)
 - `mailer.html` - Mail Transfer (SMTP, Native, Local Log Driver)
 - `helpers.html` - Complete Global Helper Reference (URLs, Database, Security, Auth, Diagnostics & Logging)
 

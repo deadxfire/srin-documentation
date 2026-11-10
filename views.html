@@ -739,7 +739,7 @@
 
             <div class="doc-content">
                 <p class="doc-lead">
-    Srin Engine features a modern, ultra-clean template compiler supporting <code>.srin.php</code> files. To break away from repetitive framework clichés and verbose copycat syntax (like Laravel Blade's <code>@if</code> and <code>@foreach</code>), Srin Engine introduces <strong>Srin Tags</strong> (<code>[if]</code>, <code>[each]</code>, <code>[empty]</code>, <code>[ifend]</code>, <code>[eachend]</code>, <code>[blockend]</code>)—an intuitive, tag-based templating system with zero shift-key friction and crystal-clear named block closures.
+    Srin Engine features a modern, ultra-clean template compiler supporting <code>.srin.php</code> files. Srin introduces <strong>Srin Tags</strong> (<code>[if]</code>, <code>[each]</code>, <code>[empty]</code>, <code>[ifend]</code>, <code>[eachend]</code>, <code>[blockend]</code>)—an intuitive, tag-based templating system with zero shift-key friction, automatic XSS sanitization (<code>[[ $var ]]</code>), raw output (<code>[{ $var }]</code>), and crystal-clear named block closures.
 </p>
 
 <h2>The Srin Signature: Clean Tag Templating &amp; Named Closers</h2>
@@ -784,59 +784,59 @@
 [paginate $posts]</code></pre>
 </div>
 
-<h2>Zero Laravel Copycat: Syntax Comparison</h2>
+<h2>Srin Tags: Clean Syntax Reference</h2>
 <div class="docs-table">
     <table>
         <thead>
             <tr>
-                <th>Laravel Blade (Old &amp; Verbose)</th>
+                <th>Conventional Syntax</th>
                 <th>Srin Tags (Modern &amp; Clean)</th>
                 <th>Why Srin Tags Are Superior</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td><code>@if($user) ... @endif</code></td>
-                <td><code>[if $user] ... [ifend]</code> (or <code>[/if]</code>)</td>
-                <td>No <code>@</code> prefix; dedicated <code>[ifend]</code> or HTML-style <code>[/if]</code> prevents nesting confusion.</td>
+                <td><code>if ($user) ... endif</code></td>
+                <td><code>[if $user] ... [ifend]</code> (or <code>[/if]</code>, <code>[end]</code>)</td>
+                <td>Clean bracket syntax; dedicated <code>[ifend]</code> or HTML-style <code>[/if]</code> prevents nesting confusion.</td>
             </tr>
             <tr>
-                <td><code>@foreach($items as $i) ... @endforeach</code></td>
-                <td><code>[each $items as $i] ... [eachend]</code> (or <code>[/each]</code>)</td>
+                <td><code>foreach ($items as $i) ... endforeach</code></td>
+                <td><code>[each $items as $i] ... [eachend]</code> (or <code>[/each]</code>, <code>[end]</code>)</td>
                 <td>Natural English verb <code>each</code> closed cleanly with <code>[eachend]</code>.</td>
             </tr>
             <tr>
-                <td><code>@forelse(...) ... @empty ... @endforelse</code></td>
+                <td><code>Empty check logic inside loop</code></td>
                 <td><code>[each $items as $i] ... [empty] ... [eachend]</code></td>
-                <td>No need to switch between <code>foreach</code> and <code>forelse</code>! Just drop in <code>[empty]</code> whenever needed.</td>
+                <td>No awkward flags or nested conditions! Just drop in <code>[empty]</code> whenever needed.</td>
             </tr>
             <tr>
-                <td><code>@unless($user) ... @endunless</code></td>
+                <td><code>if (!$user) ... endif</code></td>
                 <td><code>[unless $user] ... [endless]</code> (or <code>[unlessend]</code>)</td>
                 <td>Catchy, intuitive <code>[endless]</code> or <code>[unlessend]</code> closer.</td>
             </tr>
             <tr>
-                <td><code>@csrf</code></td>
+                <td><code>&lt;input type="hidden" name="_csrf" ...&gt;</code></td>
                 <td><code>[csrf]</code></td>
                 <td>Clean bracket tag matching your HTML component structure.</td>
             </tr>
             <tr>
-                <td><code>@honeypot</code></td>
+                <td><code>Hidden bot-trap field markup</code></td>
                 <td><code>[honeypot]</code></td>
                 <td>Renders anti-bot security trap field seamlessly.</td>
             </tr>
             <tr>
-                <td><code>@extends('layout')</code></td>
+                <td><code>Layout inheritance tag</code></td>
                 <td><code>[layout 'layouts/app']</code></td>
                 <td>Direct, intuitive declaration at the top of your page.</td>
             </tr>
             <tr>
-                <td><code>@section('scripts') ... @endsection</code></td>
+                <td><code>Named section definition</code></td>
                 <td><code>[block 'scripts'] ... [blockend]</code> (or <code>[/block]</code>)</td>
                 <td>Concise block definition with explicit <code>[blockend]</code>.</td>
             </tr>
             <tr>
-                <td><code>@yield('scripts')</code></td>
+                <td><code>Slot placeholder</code></td>
                 <td><code>[slot 'scripts']</code></td>
                 <td>Component-like slot system with optional default values: <code>[slot 'scripts', '/* fallback */']</code>.</td>
             </tr>
@@ -1003,9 +1003,9 @@
     </table>
 </div>
 
-<div class="callout callout-warning">
-    <div class="callout-title">Strict Blade Isolation</div>
-    <p>To preserve Srin Engine's identity, raw speed, and pure architecture, Laravel Blade directives (<code>@if</code>, <code>@foreach</code>, <code>@include</code>, <code>@section</code>) are <strong>strictly blocked</strong> and will throw a descriptive compilation exception. Always use Srin Tags.</p>
+<div class="callout callout-info">
+    <div class="callout-title">Pure Srin Template Engine</div>
+    <p>Srin Engine executes only native Srin Tags (<code>[if]</code>, <code>[each]</code>, <code>[block]</code>, etc.) and native output tags (<code>[[ $expr ]]</code> for safe escaped output, <code>[{ $expr }]</code> for raw unescaped output). Foreign template syntax (such as <code>{{ }}</code> or <code>@if</code>) is not evaluated.</p>
 </div>
             </div>
 

@@ -786,6 +786,26 @@
         </thead>
         <tbody>
             <tr>
+                <td><code>getlink(string $path, mixed $handler, ?string $name = null)</code> / <code>getLink()</code></td>
+                <td><code>\Core\Route</code></td>
+                <td>Registers a GET route link in <code>Routes/web.php</code>.<br><code>getlink('/about', 'HomeController@about')->name('about');</code></td>
+            </tr>
+            <tr>
+                <td><code>postlink(string $path, mixed $handler, ?string $name = null)</code> / <code>postLink()</code></td>
+                <td><code>\Core\Route</code></td>
+                <td>Registers a POST route link in <code>Routes/web.php</code>.<br><code>postlink('/contact', 'ContactController@send')->name('contact.send');</code></td>
+            </tr>
+            <tr>
+                <td><code>putlink()</code> / <code>deletelink()</code> / <code>patchlink()</code> / <code>optionslink()</code> / <code>anylink()</code></td>
+                <td><code>\Core\Route</code></td>
+                <td>Registers route links responding to corresponding HTTP verbs or any verb.</td>
+            </tr>
+            <tr>
+                <td><code>grouplink(array $attributes, Closure $callback)</code> / <code>groupLink()</code></td>
+                <td><code>void</code></td>
+                <td>Registers a group of route links sharing attributes (prefix, checkpoint, name).<br><code>grouplink(['prefix' => '/admin', 'checkpoint' => 'auth'], function() { ... });</code></td>
+            </tr>
+            <tr>
                 <td><code>asset(string $path = '')</code></td>
                 <td><code>string</code></td>
                 <td>Generates a direct, absolute web URL to an asset. Automatically resolves image file extensions directly into <code>assets/images/</code>.<br><code>&lt;img src="http://localhost:8000/assets/images/logo.png"&gt;</code></td>
@@ -895,6 +915,26 @@
                 <td><code>bool</code></td>
                 <td>Returns true if the visitor is a guest (not signed in).</td>
             </tr>
+            <tr>
+                <td><code>hash_password($pwd)</code></td>
+                <td><code>string</code></td>
+                <td>Hashes a plain password using modern Argon2id with application peppering.</td>
+            </tr>
+            <tr>
+                <td><code>verify_password($pwd, $h)</code></td>
+                <td><code>bool</code></td>
+                <td>Constant-time verification of password against stored hash.</td>
+            </tr>
+            <tr>
+                <td><code>encrypt($val)</code></td>
+                <td><code>string</code></td>
+                <td>Hardware-accelerated AES-256-GCM authenticated symmetric encryption.</td>
+            </tr>
+            <tr>
+                <td><code>decrypt($payload)</code></td>
+                <td><code>?string</code></td>
+                <td>Decrypts AEAD payload; returns null if forged, tampered, or invalid.</td>
+            </tr>
         </tbody>
     </table>
 </div>
@@ -994,6 +1034,26 @@
                 <td><code>auth_account(?string $guard = null)</code></td>
                 <td><code>?Model\Account</code></td>
                 <td>Retrieves the currently authenticated account model instance, or null.</td>
+            </tr>
+            <tr>
+                <td><code>hash_password(string $password, ?string $algo = null, array $options = [])</code></td>
+                <td><code>string</code></td>
+                <td>Hashes plain-text password using the powerful, memory-hard <strong>Argon2id</strong> algorithm (RFC 9106) with HMAC-SHA256 peppering.<br><code>$hash = hash_password($request->input('password'));</code></td>
+            </tr>
+            <tr>
+                <td><code>verify_password(string $password, string $hash)</code></td>
+                <td><code>bool</code></td>
+                <td>Constant-time, timing-attack safe verification of a plain-text password against a stored cryptographic hash.<br><code>if (verify_password($pass, $user->password)) { ... }</code></td>
+            </tr>
+            <tr>
+                <td><code>encrypt(string $value, ?string $key = null)</code></td>
+                <td><code>string</code></td>
+                <td>Encrypts a string using military-grade <strong>AES-256-GCM</strong> authenticated encryption with a unique 96-bit IV and 128-bit authentication tag.<br><code>$secret = encrypt('api-access-token-12345');</code></td>
+            </tr>
+            <tr>
+                <td><code>decrypt(string $payload, ?string $key = null)</code></td>
+                <td><code>?string</code></td>
+                <td>Decrypts an AES-256-GCM authenticated payload. Verifies the AEAD authentication tag and returns <code>null</code> if ciphertext was modified or forged.<br><code>$token = decrypt($secret);</code></td>
             </tr>
         </tbody>
     </table>

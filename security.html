@@ -742,7 +742,7 @@
     Security is not an afterthought in Srin Engine—it is woven directly into every layer of the core. With automatic CSRF tokens, anti-spam honeypot traps, built-in rate limiting, null-byte sanitization, and mass-assignment protection, your application is hardened by default.
 </p>
 
-<h2>The 7 Pillars of Srin Security</h2>
+<h2>The 8 Pillars of Srin Security</h2>
 <div class="feature-grid">
     <div class="feature-card">
         <div class="feature-icon">&#128272;</div>
@@ -765,7 +765,7 @@
     <div class="feature-card">
         <div class="feature-icon">&#128737;</div>
         <div class="feature-title">XSS Neutralization</div>
-        <div class="feature-desc">Automatic HTML entity escaping via <code>{{ $var }}</code> preventing malicious script injection.</div>
+        <div class="feature-desc">Automatic HTML entity escaping via <code>[[ $var ]]</code> preventing malicious script injection.</div>
     </div>
 
     <div class="feature-card">
@@ -779,6 +779,18 @@
         <div class="feature-title">Injection Protection</div>
         <div class="feature-desc">Automatic stripping of null bytes (<code>\0</code>), control characters, and CRLF header splitting.</div>
     </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">&#128142;</div>
+        <div class="feature-title">Argon2id Hashing</div>
+        <div class="feature-desc">Memory-hard password hashing (RFC 9106) resisting GPU/ASIC cracking with auto-rehashing and peppering.</div>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">&#128274;</div>
+        <div class="feature-title">AES-256-GCM AEAD</div>
+        <div class="feature-desc">Hardware-accelerated authenticated symmetric encryption with automatic tamper and corruption detection.</div>
+    </div>
 </div>
 
 <h2>1. Cross-Site Request Forgery (CSRF)</h2>
@@ -791,8 +803,8 @@
         <span class="code-lang">HTML / Srin Template</span>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
-    <pre><code>&lt;form method="POST" action="{{route('contact.submit')}}"&gt;
-    @csrf
+    <pre><code>&lt;form method="POST" action="[[ route('contact.submit') ]]"&gt;
+    [csrf]
     &lt;input type="text" name="name" required&gt;
     &lt;button type="submit"&gt;Send&lt;/button&gt;
 &lt;/form&gt;</code></pre>
@@ -844,9 +856,9 @@
         <span class="code-lang">HTML / Srin Template</span>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
-    <pre><code>&lt;form method="POST" action="{{route('newsletter.signup')}}"&gt;
-    @csrf
-    @honeypot
+    <pre><code>&lt;form method="POST" action="[[ route('newsletter.signup') ]]"&gt;
+    [csrf]
+    [honeypot]
 
     &lt;input type="email" name="email" placeholder="Your email" required&gt;
     &lt;button type="submit"&gt;Subscribe&lt;/button&gt;
@@ -854,7 +866,7 @@
 </div>
 
 <p>
-    The <code>@honeypot</code> directive inserts an invisible input field styled off-screen. Real human users cannot see it and leave it empty. Automated spam scripts blindly fill all inputs. Validate it in your controller:
+    The <code>[honeypot]</code> directive inserts an invisible input field styled off-screen. Real human users cannot see it and leave it empty. Automated spam scripts blindly fill all inputs. Validate it in your controller:
 </p>
 
 <div class="code-block">
@@ -940,7 +952,81 @@ if ($this->hasFile('avatar')) {
 
 <h2>7. Authentication &amp; Identity Management (Core\Auth)</h2>
 <p>
-    Srin Engine provides a built-in authentication manager (<code>Core\Auth</code>) featuring password hashing, credential verification, session fixation protection, and dynamic identity models.
+    Srin Engine provides an enterprise-grade, zero-dependency authentication manager (<code>Core\Auth</code>) featuring memory-hard password hashing, application-level peppering, automatic hash upgrades, credential verification, and session fixation defense.
+</p>
+
+<h3>Advanced Password Hashing with Argon2id (RFC 9106)</h3>
+<p>
+    Traditional hashing algorithms (such as MD5, SHA-256, or unconfigured Bcrypt) are vulnerable to modern GPU and ASIC hardware-accelerated dictionary attacks. Srin Engine defaults to <strong>Argon2id</strong> (<code>PASSWORD_ARGON2ID</code>)—the winner of the Password Hashing Competition (PHC) and recommended standard by OWASP.
+</p>
+
+<div class="callout callout-tip">
+    <div class="callout-title">Why Argon2id?</div>
+    <p>Argon2id is a hybrid of Argon2d and Argon2i. It provides maximum resistance against side-channel cache-timing attacks while remaining memory-hard, making GPU-based offline password cracking economically infeasible.</p>
+</div>
+
+<h3>Authentication Configuration (<code>Config/auth.php</code>)</h3>
+<p>
+    Fine-tune your password hashing parameters, memory limits, iteration counts, application pepper, and fallback algorithms:
+</p>
+
+<div class="code-block">
+    <div class="code-header">
+        <span class="code-lang">PHP (Config/auth.php)</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><code>return [
+    'model' => env('AUTH_MODEL', \Model\Account::class),
+    'identifier' => env('AUTH_IDENTIFIER', 'email'),
+    'password_column' => 'password',
+
+    // Password Hashing &amp; Encryption Engine
+    'hash' => [
+        // Primary algorithm: 'argon2id', 'argon2i', 'bcrypt', or 'default'
+        'algorithm' => env('AUTH_HASH_ALGO', 'argon2id'),
+
+        // RFC 9106 recommended parameters (secure &amp; lightweight)
+        'argon2id' => [
+            'memory_cost' => (int) env('AUTH_ARGON_MEMORY', 65536), // 64 MB
+            'time_cost'   => (int) env('AUTH_ARGON_TIME', 3),       // 3 iterations
+            'threads'     => (int) env('AUTH_ARGON_THREADS', 1),     // 1 execution thread
+        ],
+
+        // Bcrypt fallback configuration
+        'bcrypt' => [
+            'cost' => (int) env('AUTH_BCRYPT_COST', 12),
+        ],
+
+        // Secret Application Pepper (Keyed Hashing Salt)
+        'pepper' => env('AUTH_PEPPER', ''),
+
+        // Automatic zero-downtime hash upgrades upon user login
+        'auto_rehash' => (bool) env('AUTH_AUTO_REHASH', true),
+    ],
+];</code></pre>
+</div>
+
+<h3>Application Pepper (Defense-in-Depth)</h3>
+<p>
+    Srin Engine supports optional application-level peppering via <code>AUTH_PEPPER</code>. When configured, plain passwords are keyed using HMAC-SHA256 prior to Argon2id hashing:
+</p>
+<div class="code-block">
+    <div class="code-header">
+        <span class="code-lang">INI / .env</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><code>AUTH_HASH_ALGO=argon2id
+AUTH_ARGON_MEMORY=65536
+AUTH_ARGON_TIME=3
+AUTH_PEPPER=your-ultra-secret-application-pepper-string</code></pre>
+</div>
+<p>
+    Even if an attacker gains full read access to your SQL database dump, the password hashes cannot be brute-forced offline without the secret <code>AUTH_PEPPER</code> key located outside the database in your server environment.
+</p>
+
+<h3>Zero-Downtime Automatic Rehashing</h3>
+<p>
+    When existing users log in via <code>Auth::attempt()</code>, Srin automatically checks if their stored hash was created with an older algorithm (such as legacy Bcrypt) or with older cost/pepper parameters. If an upgrade is needed, Srin automatically rehashes the password using the current Argon2id configuration and updates the database record silently—without user disruption.
 </p>
 
 <h3>Handling Authentication in Controllers</h3>
@@ -957,6 +1043,25 @@ use Model\Account;
 
 class AuthController extends BaseController
 {
+    public function register()
+    {
+        $data = $this->guard([
+            'name'     => 'required|min:3',
+            'email'    => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        // Create account with powerful Argon2id hash
+        $user = Account::create([
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'password' => Auth::hash($data['password']), // or hash_password($data['password'])
+        ]);
+
+        Auth::login($user);
+        return $this->success('Account created successfully!')->go('dashboard');
+    }
+
     public function login()
     {
         // 1. Guard inputs (enforces CSRF and rate limiting)
@@ -965,7 +1070,7 @@ class AuthController extends BaseController
             'password' => 'required',
         ]);
 
-        // 2. Attempt authentication
+        // 2. Attempt authentication (auto-verifies and auto-rehashes to Argon2id)
         if (Auth::attempt($data['email'], $data['password'])) {
             return $this->success('Welcome back, ' . Auth::user()->name . '!')
                 ->go('dashboard');
@@ -982,7 +1087,73 @@ class AuthController extends BaseController
 }</code></pre>
 </div>
 
-<h3>Auth API Reference</h3>
+<h2>8. High-Performance Authenticated Encryption (Core\Crypt)</h2>
+<p>
+    For sensitive data that requires <strong>two-way reversible encryption</strong> (e.g., third-party API credentials, OAuth access tokens, private keys, or encrypted form fields), Srin Engine provides <code>Core\Crypt</code>—a lightweight, military-grade symmetric cipher built directly on <strong>AES-256-GCM (Galois/Counter Mode)</strong>.
+</p>
+
+<div class="feature-grid">
+    <div class="feature-card">
+        <div class="feature-icon">&#128274;</div>
+        <div class="feature-title">AES-256-GCM</div>
+        <div class="feature-desc">Hardware-accelerated AES-256 cipher delivering sub-millisecond execution with negligible CPU overhead.</div>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">&#128737;</div>
+        <div class="feature-title">AEAD Authentication</div>
+        <div class="feature-desc">128-bit authentication tag guarantees ciphertext integrity; any forged or corrupted payload is instantly rejected.</div>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">&#127922;</div>
+        <div class="feature-title">Dynamic 96-Bit Nonce</div>
+        <div class="feature-desc">Cryptographically random 12-byte IV per encryption prevents replay attacks and identical ciphertexts.</div>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">&#128279;</div>
+        <div class="feature-title">URL-Safe Base64</div>
+        <div class="feature-desc">Packed <code>IV + Tag + Ciphertext</code> format is safe for HTTP query parameters, headers, cookies, and database columns.</div>
+    </div>
+</div>
+
+<h3>Generating the Application Encryption Key</h3>
+<p>
+    Run the Srin CLI command to generate a cryptographically secure 256-bit key in your <code>.env</code> file:
+</p>
+<div class="code-block">
+    <div class="code-header">
+        <span class="code-lang">Bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><code>php srin key:generate</code></pre>
+</div>
+
+<h3>Encrypting &amp; Decrypting Sensitive Data</h3>
+<div class="code-block">
+    <div class="code-header">
+        <span class="code-lang">PHP</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><code>use Core\Crypt;
+
+// 1. Encrypt plaintext using Core\Crypt
+$encrypted = Crypt::encrypt('sk_live_51Msz...super_secret_api_key');
+
+// Or use global helper:
+$encrypted = encrypt('my-secret-token');
+
+// 2. Decrypt payload (returns null if corrupted or tampered)
+$decrypted = Crypt::decrypt($encrypted);
+
+// Or use global helper:
+$decrypted = decrypt($encrypted);
+
+if ($decrypted === null) {
+    // Payload was modified, forged, or encrypted with a different key
+    abort(400, 'Tampered cryptographic payload detected.');
+}</code></pre>
+</div>
+
+<h3>Auth &amp; Cryptography API Reference</h3>
 <div class="docs-table">
     <table>
         <thead>
@@ -1016,7 +1187,7 @@ class AuthController extends BaseController
             <tr>
                 <td><code>Auth::attempt($credentials, $pwd)</code></td>
                 <td><code>bool</code></td>
-                <td>Validates credentials, verifies password hash, logs in, and regenerates session ID.</td>
+                <td>Validates credentials, verifies password, triggers auto-rehash if needed, logs in, and regenerates session ID.</td>
             </tr>
             <tr>
                 <td><code>Auth::login($user)</code></td>
@@ -1029,14 +1200,39 @@ class AuthController extends BaseController
                 <td>Purges auth session and regenerates session ID.</td>
             </tr>
             <tr>
-                <td><code>Auth::hash($password)</code></td>
+                <td><code>Auth::hash($pwd, $algo, $opts)</code> / <code>hash_password($pwd)</code></td>
                 <td><code>string</code></td>
-                <td>Hashes a plaintext password using modern standard algorithms.</td>
+                <td>Hashes a plain password using modern, memory-hard <strong>Argon2id</strong> with application peppering.</td>
             </tr>
             <tr>
-                <td><code>Auth::verify($password, $hash)</code></td>
+                <td><code>Auth::verify($pwd, $hash)</code> / <code>verify_password($pwd, $hash)</code></td>
                 <td><code>bool</code></td>
-                <td>Timing-safe verification of plain password against stored hash.</td>
+                <td>Constant-time verification of plain password against stored hash with backward compatibility.</td>
+            </tr>
+            <tr>
+                <td><code>Auth::needsRehash($hash)</code></td>
+                <td><code>bool</code></td>
+                <td>Checks if a stored hash needs to be upgraded to the current Argon2id algorithm or parameters.</td>
+            </tr>
+            <tr>
+                <td><code>Auth::pepperPassword($password)</code></td>
+                <td><code>string</code></td>
+                <td>Applies configured <code>AUTH_PEPPER</code> using HMAC-SHA256.</td>
+            </tr>
+            <tr>
+                <td><code>Crypt::encrypt($value, $key)</code> / <code>encrypt($value)</code></td>
+                <td><code>string</code></td>
+                <td>Encrypts a string using hardware-accelerated <strong>AES-256-GCM</strong> authenticated encryption.</td>
+            </tr>
+            <tr>
+                <td><code>Crypt::decrypt($payload, $key)</code> / <code>decrypt($payload)</code></td>
+                <td><code>?string</code></td>
+                <td>Decrypts and verifies an AEAD payload, returning <code>null</code> if tampered or invalid.</td>
+            </tr>
+            <tr>
+                <td><code>Crypt::generateKey()</code></td>
+                <td><code>string</code></td>
+                <td>Generates a cryptographically random 256-bit encryption key formatted as <code>base64:...</code>.</td>
             </tr>
         </tbody>
     </table>

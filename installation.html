@@ -809,6 +809,10 @@ APP_DEBUG=true
 APP_URL=http://localhost:8000
 APP_KEY=base64:srin-random-secret-key-32-chars
 
+# Password Hashing & Security (argon2id recommended)
+AUTH_HASH_ALGO=argon2id
+# AUTH_PEPPER=your-optional-secret-pepper
+
 # Database Configuration (sqlite, mysql, or pgsql)
 DB_CONNECTION=sqlite
 DB_DATABASE=Storage/database.sqlite
@@ -825,6 +829,18 @@ DB_DATABASE=Storage/database.sqlite
 <div class="callout callout-warning">
     <div class="callout-title">Production Notice</div>
     <p>In production environments, always set <code>APP_ENV=production</code> and <code>APP_DEBUG=false</code>. This prevents internal stack traces from being displayed to end users and routes fatal errors to custom <code>Pages/errors/500.srin.php</code> views.</p>
+</div>
+
+<h2>Generating Application Key (APP_KEY)</h2>
+<p>
+    Srin Engine's authenticated encryption engine (<code>Core\Crypt</code>) requires a 256-bit secret key. Generate and store your application key with:
+</p>
+<div class="code-block">
+    <div class="code-header">
+        <span class="code-lang">Bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><code>php srin key:generate</code></pre>
 </div>
 
 <h2>Directory Permissions</h2>

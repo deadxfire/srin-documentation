@@ -742,9 +742,9 @@
     Srin Engine features a lightning-fast, expressive HTTP router. Define web routes in <code>Routes/web.php</code> and stateless API routes in <code>Routes/api.php</code> with support for named routes, URI parameters, and route inspection.
 </p>
 
-<h2>Basic Route Registration</h2>
+<h2>Basic Route Link Registration</h2>
 <p>
-    Routes accept a URI pattern and a handler (either a Closure, a controller string <code>Controller@action</code>, or an array <code>[Controller::class, 'action']</code>):
+    Routes are registered in <code>Routes/web.php</code> using Srin's expressive Route Link functions (<code>getlink()</code>, <code>postlink()</code>, etc.) or the fluent <code>Core\Link</code> facade. Handlers accept a Closure, a controller string (<code>Controller@action</code>), or an array (<code>[Controller::class, 'action']</code>):
 </p>
 
 <div class="code-block">
@@ -752,25 +752,28 @@
         <span class="code-lang">PHP (Routes/web.php)</span>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
-    <pre><code>use Core\Router;
+    <pre><code>use Core\Link;
 use Controller\HomeController;
 use Controller\BlogController;
 
-// Simple closure route
-Router::get('/', function() {
+// Simple closure link
+getlink('/', function() {
     return 'Welcome to Srin Engine!';
 });
 
 // Controller action using Class string
-Router::get('/about', 'HomeController@about');
+getlink('/about', 'HomeController@about');
 
 // Controller action using Array syntax
-Router::get('/blog', [BlogController::class, 'index']);</code></pre>
+getlink('/blog', [BlogController::class, 'index']);
+
+// Fluent OOP Link facade
+Link::get('/pricing', 'PricingController@index');</code></pre>
 </div>
 
-<h2>Available Router Methods</h2>
+<h2>Available Route Link Methods</h2>
 <p>
-    The router supports all standard HTTP verbs:
+    The Link engine supports all standard HTTP verbs:
 </p>
 
 <div class="code-block">
@@ -778,13 +781,22 @@ Router::get('/blog', [BlogController::class, 'index']);</code></pre>
         <span class="code-lang">PHP</span>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
-    <pre><code>Router::get($uri, $action);
-Router::post($uri, $action);
-Router::put($uri, $action);
-Router::patch($uri, $action);
-Router::delete($uri, $action);
-Router::options($uri, $action);
-Router::any($uri, $action); // Matches any HTTP verb</code></pre>
+    <pre><code>getlink($uri, $action);
+postlink($uri, $action);
+putlink($uri, $action);
+patchlink($uri, $action);
+deletelink($uri, $action);
+optionslink($uri, $action);
+anylink($uri, $action); // Matches any HTTP verb
+
+// Or via Core\Link facade:
+Link::get($uri, $action);
+Link::post($uri, $action);
+Link::put($uri, $action);
+Link::patch($uri, $action);
+Link::delete($uri, $action);
+Link::options($uri, $action);
+Link::any($uri, $action);</code></pre>
 </div>
 
 <h2>Route Parameters</h2>
@@ -798,10 +810,10 @@ Router::any($uri, $action); // Matches any HTTP verb</code></pre>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
     <pre><code>// Single parameter
-Router::get('/users/{id}', 'UserController@show');
+getlink('/users/{id}', 'UserController@show');
 
 // Multiple parameters
-Router::get('/posts/{category}/{slug}', 'PostController@show');</code></pre>
+getlink('/posts/{category}/{slug}', 'PostController@show');</code></pre>
 </div>
 
 <p>Inside your controller action, type-hint the incoming parameters:</p>
@@ -832,16 +844,16 @@ Router::get('/posts/{category}/{slug}', 'PostController@show');</code></pre>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
     <pre><code>// Direct 3rd-parameter naming (Srin signature style)
-Router::get('/articles', 'ArticleController@index', 'articles.index');
-Router::post('/articles', 'ArticleController@store', 'articles.store');
+getlink('/articles', 'ArticleController@index', 'articles.index');
+postlink('/articles', 'ArticleController@store', 'articles.store');
 
 // Or fluent chaining with ->name()
-Router::get('/checkout', 'CartController@checkout')->name('cart.checkout');</code></pre>
+getlink('/checkout', 'CartController@checkout')->name('cart.checkout');</code></pre>
 </div>
 
 <h3>Generating URLs with the <code>route()</code> Helper</h3>
 <p>
-    Use the global <code>route()</code> helper in PHP code or <code>{{route('name')}}</code> in your <code>.srin.php</code> view templates:
+    Use the global <code>route()</code> helper in PHP code or <code>[[ route('name') ]]</code> in your <code>.srin.php</code> view templates:
 </p>
 
 <div class="code-block">
@@ -850,10 +862,10 @@ Router::get('/checkout', 'CartController@checkout')->name('cart.checkout');</cod
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
     <pre><code><!-- Without parameters -->
-&lt;a href="{{route('cart.checkout')}}"&gt;Proceed to Checkout&lt;/a&gt;
+&lt;a href="[[ route('cart.checkout') ]]"&gt;Proceed to Checkout&lt;/a&gt;
 
 <!-- With route parameters -->
-&lt;a href="{{route('docs.show', ['topic' => 'routing'])}}"&gt;Read Routing Docs&lt;/a&gt;
+&lt;a href="[[ route('docs.show', ['topic' => 'routing']) ]]"&gt;Read Routing Docs&lt;/a&gt;
 
 <!-- In PHP Controller or Middleware -->
 $url = route('docs.show', ['topic' => 'routing']);</code></pre>
@@ -870,9 +882,9 @@ $url = route('docs.show', ['topic' => 'routing']);</code></pre>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
     <pre><code>&lt;nav&gt;
-    &lt;a href="{{route('home')}}" class="&lt;?= is_home() ? 'active' : '' ?&gt;"&gt;Home&lt;/a&gt;
-    &lt;a href="{{route('blog.index')}}" class="&lt;?= is_route('blog.index') ? 'active' : '' ?&gt;"&gt;Blog&lt;/a&gt;
-    &lt;a href="{{route('docs')}}" class="&lt;?= is_route_active('docs.*') ? 'active' : '' ?&gt;"&gt;Documentation&lt;/a&gt;
+    &lt;a href="[[ route('home') ]]" class="&lt;?= is_home() ? 'active' : '' ?&gt;"&gt;Home&lt;/a&gt;
+    &lt;a href="[[ route('blog.index') ]]" class="&lt;?= is_route('blog.index') ? 'active' : '' ?&gt;"&gt;Blog&lt;/a&gt;
+    &lt;a href="[[ route('docs') ]]" class="&lt;?= is_route_active('docs.*') ? 'active' : '' ?&gt;"&gt;Documentation&lt;/a&gt;
 &lt;/nav&gt;</code></pre>
 </div>
 
@@ -883,7 +895,7 @@ $url = route('docs.show', ['topic' => 'routing']);</code></pre>
 
 <h2>Checkpoints: The Clean Middleware Alternative</h2>
 <p>
-    Instead of bloated, recursive closure chains (Laravel's onion middleware), Srin Engine introduces <strong>Checkpoints</strong>—linear request verification gates with an intuitive <code>enter()</code> and <code>leave()</code> lifecycle.
+    Instead of bloated, recursive closure chains and complex onion pipelines, Srin Engine introduces <strong>Checkpoints</strong>—linear request verification gates with an intuitive <code>enter()</code> and <code>leave()</code> lifecycle.
 </p>
 
 <h3>1. Attaching Checkpoints to Routes</h3>
@@ -897,17 +909,17 @@ $url = route('docs.show', ['topic' => 'routing']);</code></pre>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
     <pre><code>// Single checkpoint
-Router::get('/dashboard', 'DashboardController@index', 'dashboard')
+getlink('/dashboard', 'DashboardController@index', 'dashboard')
     -&gt;checkpoint('auth');
 
 // Multiple checkpoints
-Router::get('/admin/reports', 'AdminController@reports', 'admin.reports')
+getlink('/admin/reports', 'AdminController@reports', 'admin.reports')
     -&gt;checkpoint(['auth', 'admin']);</code></pre>
 </div>
 
 <h3>2. Route Groups with Checkpoints &amp; Prefixes</h3>
 <p>
-    Bundle protected routes together using <code>Router::group()</code>:
+    Bundle protected routes together using <code>grouplink()</code> (or <code>Link::group()</code>):
 </p>
 
 <div class="code-block">
@@ -915,10 +927,10 @@ Router::get('/admin/reports', 'AdminController@reports', 'admin.reports')
         <span class="code-lang">PHP (Routes/web.php)</span>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
-    <pre><code>Router::group(['prefix' =&gt; '/dashboard', 'checkpoint' =&gt; 'auth'], function () {
-    Router::get('/', 'DashboardController@index', 'dashboard');
-    Router::get('/profile', 'DashboardController@profile', 'dashboard.profile');
-    Router::post('/avatar', 'DashboardController@uploadAvatar', 'dashboard.avatar');
+    <pre><code>grouplink(['prefix' =&gt; '/dashboard', 'checkpoint' =&gt; 'auth'], function () {
+    getlink('/', 'DashboardController@index', 'dashboard');
+    getlink('/profile', 'DashboardController@profile', 'dashboard.profile');
+    postlink('/avatar', 'DashboardController@uploadAvatar', 'dashboard.avatar');
 });</code></pre>
 </div>
 
@@ -966,7 +978,7 @@ Router::get('/admin/reports', 'AdminController@reports', 'admin.reports')
 </div>
 
 <p>
-    Unlike Laravel's confusing <code>handle($request, Closure $next)</code> where forgetting <code>$next()</code> breaks the app, Srin Checkpoints are clear and linear:
+    Unlike confusing recursive pipelines where forgetting to return the response breaks the app, Srin Checkpoints are clear and linear:
 </p>
 
 <div class="code-block">

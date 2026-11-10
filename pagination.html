@@ -773,7 +773,7 @@
 
 <h2>Rendering Pagination in Views</h2>
 <p>
-    Render pagination controls in your <code>.srin.php</code> view using the native <code>@paginate()</code> directive or the <code>$posts->render()</code> method:
+    Render pagination controls in your <code>.srin.php</code> view using the native <code>[paginate $posts]</code> directive or the <code>$posts->render()</code> method:
 </p>
 
 <div class="code-block">
@@ -782,16 +782,18 @@
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
     <pre><code>&lt;div class="posts-list"&gt;
-    &lt;?php foreach ($posts as $post): ?&gt;
+    [each $posts as $post]
         &lt;div class="post-card"&gt;
-            &lt;h3&gt;{{ $post->title }}&lt;/h3&gt;
-            &lt;p&gt;{{ $post->summary }}&lt;/p&gt;
+            &lt;h3&gt;[[ $post->title ]]&lt;/h3&gt;
+            &lt;p&gt;[[ $post->summary ]]&lt;/p&gt;
         &lt;/div&gt;
-    &lt;?php endforeach; ?&gt;
+    [empty]
+        &lt;p&gt;No posts found.&lt;/p&gt;
+    [eachend]
 &lt;/div&gt;
 
 &lt;!-- Render modern pagination navigation links --&gt;
-@paginate($posts)</code></pre>
+[paginate $posts]</code></pre>
 </div>
 
 <h2>Iterating &amp; Array Access</h2>
