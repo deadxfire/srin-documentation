@@ -739,17 +739,17 @@
 
             <div class="doc-content">
                 <p class="doc-lead">
-    Srin Engine features a lightning-fast, expressive HTTP router. Define web routes in <code>Routes/web.php</code> and stateless API routes in <code>Routes/api.php</code> with support for named routes, URI parameters, and route inspection.
+    Srin Engine features a lightning-fast, expressive HTTP router. Define route links in <code>Routes/link.php</code> and stateless API routes in <code>Routes/api.php</code> with support for named route links, URI parameters, and route inspection.
 </p>
 
 <h2>Basic Route Link Registration</h2>
 <p>
-    Routes are registered in <code>Routes/web.php</code> using Srin's expressive Route Link functions (<code>getlink()</code>, <code>postlink()</code>, etc.) or the fluent <code>Core\Link</code> facade. Handlers accept a Closure, a controller string (<code>Controller@action</code>), or an array (<code>[Controller::class, 'action']</code>):
+    Route links are registered in <code>Routes/link.php</code> using Srin's expressive Route Link functions (<code>getlink()</code>, <code>postlink()</code>, etc.) or the fluent <code>Core\Link</code> facade. Handlers accept a Closure, a controller string (<code>Controller@action</code>), or an array (<code>[Controller::class, 'action']</code>):
 </p>
 
 <div class="code-block">
     <div class="code-header">
-        <span class="code-lang">PHP (Routes/web.php)</span>
+        <span class="code-lang">PHP (Routes/link.php)</span>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
     <pre><code>use Core\Link;
@@ -905,7 +905,7 @@ $url = route('docs.show', ['topic' => 'routing']);</code></pre>
 
 <div class="code-block">
     <div class="code-header">
-        <span class="code-lang">PHP (Routes/web.php)</span>
+        <span class="code-lang">PHP (Routes/link.php)</span>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
     <pre><code>// Single checkpoint
@@ -924,7 +924,7 @@ getlink('/admin/reports', 'AdminController@reports', 'admin.reports')
 
 <div class="code-block">
     <div class="code-header">
-        <span class="code-lang">PHP (Routes/web.php)</span>
+        <span class="code-lang">PHP (Routes/link.php)</span>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
     <pre><code>grouplink(['prefix' =&gt; '/dashboard', 'checkpoint' =&gt; 'auth'], function () {
