@@ -787,6 +787,11 @@
                 <td>Generates a new linear request checkpoint inside <code>Checkpoint/</code> extending <code>Core\Checkpoint</code>.</td>
             </tr>
             <tr>
+                <td><code>add command</code></td>
+                <td><code>&lt;Name&gt;</code></td>
+                <td>Generates a custom CLI command and cPanel cron job in <code>Command/</code> extending <code>Core\Command</code>.</td>
+            </tr>
+            <tr>
                 <td><code>add seeder</code></td>
                 <td><code>&lt;Name&gt;</code></td>
                 <td>Creates a new database seeder class in <code>database/seeders/</code>.</td>
@@ -840,6 +845,16 @@
                 <td><code>init</code></td>
                 <td><code>[--force]</code></td>
                 <td>Configures <code>.env</code> with project name and generates secure 256-bit <code>APP_KEY</code> (runs automatically on <code>composer create-project</code>).</td>
+            </tr>
+            <tr>
+                <td><code>commands</code></td>
+                <td>None</td>
+                <td>Lists all registered custom CLI and cPanel cron commands discovered in <code>Command/</code>.</td>
+            </tr>
+            <tr>
+                <td><code>&lt;custom-command&gt;</code></td>
+                <td><code>[args]</code></td>
+                <td>Executes a custom CLI command or background cron task (e.g. <code>srin send-weekly-digest</code>).</td>
             </tr>
             <tr>
                 <td><code>links</code></td>
@@ -1064,6 +1079,153 @@ srin add checkpoint VerifySubscription</code></pre>
 <p>
     This command automatically generates a 32-byte random binary key using <code>random_bytes(32)</code>, formats it as <code>base64:...</code>, copies <code>.env.example</code> to <code>.env</code> if needed, and safely updates the <code>APP_KEY</code> entry.
 </p>
+
+<h2>Custom CLI Commands &amp; cPanel Cron Jobs</h2>
+<p>
+    Srin Engine empowers you to create custom command-line tools, batch data processing tasks, maintenance routines, and scheduled cron jobs that run seamlessly both in local development and on live cPanel hosting. Every custom command extends <code>Core\Command</code> and gains full access to database connections (<code>Core\DB</code>), models, configuration, mail transfer, and <code>.env</code> variables.
+</p>
+
+<h3>1. Scaffolding a Custom Command</h3>
+<p>
+    Generate a new command using <code>srin add command &lt;Name&gt;</code>:
+</p>
+
+<div class="code-block">
+    <div class="code-header">
+        <span class="code-lang">Bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><code>srin add command SendWeeklyDigest</code></pre>
+</div>
+
+<p>
+    Srin automatically transforms the input into a StudlyCase class (<code>Command\SendWeeklyDigest</code>) inside <code>Command/SendWeeklyDigest.php</code>, creates a kebab-case command signature (<code>send-weekly-digest</code>), and displays the complete copy-paste cPanel cron job setup instructions.
+</p>
+
+<h3>2. Anatomy of a Command Class</h3>
+<p>
+    Commands inherit built-in ANSI coloring methods, table formatters, and interactive terminal input utilities directly from <code>Core\Command</code>:
+</p>
+
+<div class="code-block">
+    <div class="code-header">
+        <span class="code-lang">PHP</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><code>&lt;?php
+
+namespace Command;
+
+use Core\Command;
+use Core\DB;
+use Core\Mailer;
+
+class SendWeeklyDigest extends Command
+{
+    /**
+     * The command signature / CLI trigger name.
+     */
+    public string $name = 'send-weekly-digest';
+
+    /**
+     * Brief description shown in help and listings.
+     */
+    public string $description = 'Send weekly newsletter and digest to active subscribers';
+
+    /**
+     * Execute the command logic.
+     *
+     * @param array $args Command line arguments passed after the command name.
+     * @return int Exit code (0 for success, non-zero for error)
+     */
+    public function execute(array $args): int
+    {
+        $this-&gt;info("Running SendWeeklyDigest...");
+
+        // Query database via DB or Model
+        $subscribers = DB::table('users')-&gt;where('subscribed', 1)-&gt;get();
+        $this-&gt;line("Found " . count($subscribers) . " subscribers.");
+
+        // Built-in output and interaction helpers:
+        // $this-&gt;info("text");          // Cyan informational message
+        // $this-&gt;success("text");       // Green success message
+        // $this-&gt;warning("text");       // Yellow warning message
+        // $this-&gt;error("text");         // Red error message
+        // $this-&gt;line("text");          // Standard line
+        // $this-&gt;table($headers, $rows); // Formatted ASCII data table
+        // $this-&gt;confirm("Are you sure?", false); // Interactive confirmation
+        // $this-&gt;ask("Enter parameter:", "default"); // Interactive prompt
+
+        $this-&gt;success("SendWeeklyDigest finished successfully!");
+        return 0;
+    }
+}</code></pre>
+</div>
+
+<h3>3. Running Custom Commands via Terminal</h3>
+<p>
+    Execute your command using either the command signature, the class name, or the explicit <code>run</code> keyword:
+</p>
+
+<div class="code-block">
+    <div class="code-header">
+        <span class="code-lang">Bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><code># Run by trigger signature
+srin send-weekly-digest
+
+# Or run by class name
+srin SendWeeklyDigest
+
+# Using explicit run
+srin run send-weekly-digest
+
+# List all registered custom commands in Command/
+srin commands</code></pre>
+</div>
+
+<h3>4. Setting up in cPanel Cron Jobs</h3>
+<p>
+    To automate your command on a recurring schedule in cPanel:
+</p>
+<ol>
+    <li>Log into your <strong>cPanel</strong> dashboard.</li>
+    <li>Scroll to <strong>Advanced</strong> and click <strong>Cron Jobs</strong>.</li>
+    <li>Under <em>Add New Cron Job</em>, pick your schedule from the <strong>Common Settings</strong> dropdown (e.g. <em>Once Per Day (0 0 * * *)</em> or <em>Every Hour (0 * * * *)</em>).</li>
+    <li>In the <strong>Command</strong> field, paste either of the following commands:</li>
+</ol>
+
+<div class="code-block">
+    <div class="code-header">
+        <span class="code-lang">cPanel Cron Job (Absolute Path)</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><code>/usr/local/bin/php /home/YOUR_CPANEL_USER/public_html/srin send-weekly-digest &gt;/dev/null 2&gt;&amp;1</code></pre>
+</div>
+
+<p>
+    Or if using directory navigation:
+</p>
+
+<div class="code-block">
+    <div class="code-header">
+        <span class="code-lang">cPanel Cron Job (cd Directory)</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><code>cd /home/YOUR_CPANEL_USER/public_html &amp;&amp; /usr/local/bin/php srin send-weekly-digest &gt;/dev/null 2&gt;&amp;1</code></pre>
+</div>
+
+<div class="docs-callout docs-callout-info">
+    <h4>Why <code>&gt;/dev/null 2&gt;&amp;1</code>?</h4>
+    <p>
+        cPanel sends an email to the account owner whenever a cron job outputs text to standard output or standard error. Adding <code>&gt;/dev/null 2&gt;&amp;1</code> discards routine output and prevents your inbox from being spammed on every execution.
+    </p>
+    <p>
+        To save output to a log file on your server for auditing or debugging, redirect output to a log file instead:
+    </p>
+    <code>/usr/local/bin/php /home/YOUR_CPANEL_USER/public_html/srin send-weekly-digest &gt;&gt; /home/YOUR_CPANEL_USER/public_html/Others/logs/cron.log 2&gt;&amp;1</code>
+</div>
             </div>
 
             <!-- Previous / Next Navigation Links -->
