@@ -744,7 +744,7 @@
 
 <h2>Overview &amp; Usage</h2>
 <p>
-    You can invoke the Srin CLI from the root of your project using <code>php srin &lt;command&gt; [options]</code>. To display the full interactive command list at any time, run:
+    You can invoke the Srin CLI from the root of your project using <code>srin &lt;command&gt; [options]</code> (or <code>php srin ...</code>). To display the full interactive command list at any time, run:
 </p>
 
 <div class="code-block">
@@ -752,7 +752,7 @@
         <span class="code-lang">Bash</span>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
-    <pre><code>php srin help</code></pre>
+    <pre><code>srin help</code></pre>
 </div>
 
 <h2>Command Matrix</h2>
@@ -767,29 +767,49 @@
         </thead>
         <tbody>
             <tr>
-                <td><code>serve</code></td>
-                <td><code>--port=8000</code>, <code>--host=127.0.0.1</code></td>
-                <td>Starts the embedded PHP development web server.</td>
-            </tr>
-            <tr>
-                <td><code>routes</code></td>
-                <td>None</td>
-                <td>Displays a clean formatted table of all registered routes, HTTP methods, and handlers.</td>
-            </tr>
-            <tr>
-                <td><code>make:controller</code></td>
+                <td><code>add controller</code></td>
                 <td><code>&lt;Name&gt; [--mail]</code></td>
                 <td>Generates a new controller inside <code>Controller/</code> extending <code>BaseController</code>.</td>
             </tr>
             <tr>
-                <td><code>make:model</code></td>
+                <td><code>add model</code></td>
                 <td><code>&lt;Name&gt; [-m]</code></td>
-                <td>Generates a new ActiveRecord model in <code>Model/</code> with fillable attributes. <code>-m</code> flag auto-creates a paired migration.</td>
+                <td>Generates a new ActiveRecord model in <code>Model/</code>. <code>-m</code> flag auto-creates a paired migration.</td>
             </tr>
             <tr>
-                <td><code>make:migration</code></td>
-                <td><code>&lt;name&gt; [--create=table]</code></td>
-                <td>Generates a timestamped schema migration file in <code>Database/Migrations/</code>.</td>
+                <td><code>add migration</code></td>
+                <td><code>&lt;name&gt;</code></td>
+                <td>Generates a timestamped schema migration file in <code>database/migrations/</code>.</td>
+            </tr>
+            <tr>
+                <td><code>add checkpoint</code></td>
+                <td><code>&lt;Name&gt;</code></td>
+                <td>Generates a new linear request checkpoint inside <code>Checkpoint/</code> extending <code>Core\Checkpoint</code>.</td>
+            </tr>
+            <tr>
+                <td><code>add seeder</code></td>
+                <td><code>&lt;Name&gt;</code></td>
+                <td>Creates a new database seeder class in <code>database/seeders/</code>.</td>
+            </tr>
+            <tr>
+                <td><code>add page</code></td>
+                <td><code>&lt;name&gt;</code></td>
+                <td>Generates a new view page in <code>Pages/</code> connected to <code>[connect 'layouts/main']</code>.</td>
+            </tr>
+            <tr>
+                <td><code>add layout</code></td>
+                <td><code>&lt;name&gt;</code></td>
+                <td>Creates a new master layout file in <code>Pages/layouts/</code>.</td>
+            </tr>
+            <tr>
+                <td><code>add partial</code></td>
+                <td><code>&lt;name&gt;</code></td>
+                <td>Creates a reusable partial component in <code>Pages/partials/</code>.</td>
+            </tr>
+            <tr>
+                <td><code>add error</code></td>
+                <td><code>&lt;status_code&gt;</code></td>
+                <td>Scaffolds a customized HTTP error view (e.g. 403, 404, 500) in <code>Pages/errors/</code>.</td>
             </tr>
             <tr>
                 <td><code>migrate</code></td>
@@ -797,69 +817,54 @@
                 <td>Executes all pending database migrations in chronological order.</td>
             </tr>
             <tr>
-                <td><code>migrate:rollback</code></td>
-                <td>None</td>
-                <td>Rolls back the last executed batch of database migrations.</td>
-            </tr>
-            <tr>
-                <td><code>migrate:status</code></td>
-                <td>None</td>
-                <td>Shows migration status: ran vs pending migrations.</td>
-            </tr>
-            <tr>
-                <td><code>migrate:fresh</code></td>
+                <td><code>migrate fresh</code></td>
                 <td><code>[--seed]</code></td>
                 <td>Drops all tables and re-executes all migrations from scratch. Optionally runs seeders.</td>
             </tr>
             <tr>
-                <td><code>make:seeder</code></td>
-                <td><code>&lt;Name&gt;</code></td>
-                <td>Creates a new database seeder class in <code>Database/Seeders/</code>.</td>
+                <td><code>migrate rollback</code></td>
+                <td>None</td>
+                <td>Rolls back the last executed batch of database migrations.</td>
             </tr>
             <tr>
-                <td><code>db:seed</code></td>
+                <td><code>migrate status</code></td>
+                <td>None</td>
+                <td>Shows database migration status: ran vs pending migrations.</td>
+            </tr>
+            <tr>
+                <td><code>seed</code></td>
                 <td><code>[--class=Name]</code></td>
                 <td>Runs database seeders to populate initial or test data.</td>
             </tr>
             <tr>
-                <td><code>make:page</code></td>
-                <td><code>&lt;name&gt;</code></td>
-                <td>Generates a new view template in <code>Pages/</code> with <code>@Connect('layouts/app')</code>.</td>
+                <td><code>links</code></td>
+                <td>None</td>
+                <td>Displays a clean formatted table of all registered route links from <code>Routes/link.php</code>.</td>
             </tr>
             <tr>
-                <td><code>make:layout</code></td>
-                <td><code>&lt;name&gt;</code></td>
-                <td>Creates a new master layout file in <code>Pages/layouts/</code>.</td>
+                <td><code>dev</code></td>
+                <td><code>[--port=8000]</code></td>
+                <td>Starts the embedded PHP local development web server.</td>
             </tr>
             <tr>
-                <td><code>make:partial</code></td>
-                <td><code>&lt;name&gt;</code></td>
-                <td>Creates a reusable partial component in <code>Pages/partials/</code>.</td>
-            </tr>
-            <tr>
-                <td><code>make:error</code></td>
-                <td><code>&lt;status_code&gt;</code></td>
-                <td>Scaffolds a customized HTTP error view (e.g. 403, 404, 500) in <code>Pages/errors/</code>.</td>
+                <td><code>key</code></td>
+                <td><code>[--force]</code></td>
+                <td>Generates a cryptographically secure 256-bit encryption key (AES-256-GCM) and sets <code>APP_KEY</code> in <code>.env</code>.</td>
             </tr>
             <tr>
                 <td><code>logs</code></td>
-                <td><code>[--tail | -f] [--lines=N] [--mail]</code></td>
-                <td>Views formatted application logs with ANSI color-coded severity levels (ERROR, WARNING, INFO, DEBUG) and live real-time tailing.</td>
+                <td><code>[-f] [--lines=N] [--mail]</code></td>
+                <td>Views formatted application logs with ANSI color-coded severity levels and live real-time tailing.</td>
             </tr>
             <tr>
-                <td><code>clear:logs</code></td>
+                <td><code>clear logs</code></td>
                 <td>None</td>
                 <td>Flushes application and mail logs in <code>Others/logs/</code>.</td>
             </tr>
             <tr>
-                <td><code>key:generate</code></td>
+                <td><code>clear cache</code></td>
                 <td>None</td>
-                <td>Generates a cryptographically secure 256-bit encryption key (AES-256-GCM) and sets <code>APP_KEY</code> in <code>.env</code>.</td>
-            </tr>
-            <tr>
-                <td><code>make:checkpoint</code></td>
-                <td><code>&lt;Name&gt;</code></td>
-                <td>Generates a new linear request checkpoint inside <code>Checkpoint/</code> extending <code>Core\Checkpoint</code>.</td>
+                <td>Flushes compiled template view cache in <code>Others/cache/views/</code>.</td>
             </tr>
         </tbody>
     </table>
@@ -876,10 +881,10 @@
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
     <pre><code># Generates Controller/ArticleController.php
-php srin make:controller Article
+srin add controller Article
 
 # Scaffold a contact controller pre-configured with PHPMailer logic
-php srin make:controller Contact --mail</code></pre>
+srin add controller Contact --mail</code></pre>
 </div>
 
 <h2>Deep Dive: Generating Models &amp; Migrations</h2>
@@ -892,13 +897,13 @@ php srin make:controller Contact --mail</code></pre>
         <span class="code-lang">Bash</span>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
-    <pre><code># Generates Model/Product.php and Database/Migrations/2026_xx_xx_create_products_table.php
-php srin make:model Product -m</code></pre>
+    <pre><code># Generates Model/Product.php and database/migrations/YYYY_MM_DD_HHMMSS_create_products_table.php
+srin add model Product -m</code></pre>
 </div>
 
-<h2>Inspecting Registered Routes</h2>
+<h2>Inspecting Registered Route Links</h2>
 <p>
-    Ever wonder what routes are currently active or which controller action handles an endpoint? Use <code>php srin routes</code> to print an ASCII table:
+    Ever wonder what route links are currently active or which controller action handles an endpoint? Use <code>srin links</code> to print the route table:
 </p>
 
 <div class="code-block">
@@ -906,7 +911,7 @@ php srin make:model Product -m</code></pre>
         <span class="code-lang">Bash</span>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
-    <pre><code>php srin routes
+    <pre><code>srin links
 
 +--------+------------------+--------------------+-----------------------------+
 | Method | URI              | Name               | Action                      |
@@ -1035,7 +1040,7 @@ tail -n 100 Others/logs/srin.log</code></pre>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
     <pre><code># Scaffolds Checkpoint/VerifySubscriptionCheckpoint.php
-php srin make:checkpoint VerifySubscription</code></pre>
+srin add checkpoint VerifySubscription</code></pre>
 </div>
 
 <h2>Generating Encryption Keys (APP_KEY)</h2>
@@ -1048,7 +1053,7 @@ php srin make:checkpoint VerifySubscription</code></pre>
         <span class="code-lang">Bash</span>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
-    <pre><code>php srin key:generate</code></pre>
+    <pre><code>srin key</code></pre>
 </div>
 
 <p>
