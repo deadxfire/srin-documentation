@@ -758,7 +758,7 @@
 <h2>Installing Srin Engine</h2>
 
 <h3>Option 1: Using Composer (Recommended)</h3>
-<p>Create a fresh Srin Engine application using Composer:</p>
+<p>Create a fresh Srin Engine application using Composer. Srin automatically creates your <code>.env</code> file, configures <code>APP_NAME</code> based on whatever project name you provide, and generates a cryptographically secure 256-bit <code>APP_KEY</code> right during installation:</p>
 <div class="code-block">
     <div class="code-header">
         <span class="code-lang">Bash</span>
@@ -768,7 +768,7 @@
 </div>
 
 <h3>Option 2: Cloning from GitHub</h3>
-<p>Alternatively, clone the repository directly from GitHub:</p>
+<p>Alternatively, clone the repository directly from GitHub and initialize the project with one command:</p>
 <div class="code-block">
     <div class="code-header">
         <span class="code-lang">Bash</span>
@@ -776,7 +776,8 @@
     </div>
     <pre><code>git clone https://github.com/deadxfire/srin.git my-srin-app
 cd my-srin-app
-composer install</code></pre>
+composer install
+srin init</code></pre>
 </div>
 
 <h2>Environment Configuration</h2>
